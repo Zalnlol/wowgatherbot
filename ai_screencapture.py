@@ -107,32 +107,32 @@ class ScreenCaptureAgent:
                     min_val_herb, max_val_herb, min_loc_herb, max_loc_herb = cv.minMaxLoc(nav_loc_herb)
                     self.nav_loc = max_loc_herb
                     
-                    if max_val_herb >= 0.52:
-                        herb_target = cv.rectangle(self.minimap, max_loc_herb, (max_loc_herb[0] + icon_w_herb, max_loc_herb[1] + icon_h_herb), (0, 255, 255), 2)
-                        # center = cv.rectangle(self.minimap, self.center_screen_topleft , self.center_screen_bottomright , (0, 255, 255), 2)
+                    if max_val_herb >= 0.4:
+                        cv.rectangle(self.minimap, max_loc_herb, (max_loc_herb[0] + icon_w_herb, max_loc_herb[1] + icon_h_herb), (0, 255, 255), 2)
+                        cv.putText(self.minimap,"Nav Tar: " + str(self.nav_loc) + f"{self.nav_loc_match}",(0, 200), cv.FONT_HERSHEY_DUPLEX,0.3,(255,50,230),1,cv.LINE_AA)
 
+                        if self.nav_loc:
+                            turn_angle = np.round(nav.get_nav_turn_angle(self.nav_loc) * 360 / 3.14, 2)
+                            pitch_angle = np.round(nav.get_nav_elevation_angle(self.nav_loc) * 360 / 3.14, 2)
+                            cv.putText(self.minimap,"Turn: " + str(turn_angle) + "deg",(0, 250), cv.FONT_HERSHEY_DUPLEX,0.5,(255,50,230),1,cv.LINE_AA)
+                            cv.putText(self.minimap,"Pitch: " + str(pitch_angle) + "deg",(0, 300), cv.FONT_HERSHEY_DUPLEX,0.5,(255,50,230),1,cv.LINE_AA)
 
-                    cv.putText(self.minimap,"Nav Tar: " + str(self.nav_loc) + f"{self.nav_loc_match}",(0, 200), cv.FONT_HERSHEY_DUPLEX,1,(255,50,230),1,cv.LINE_AA)
-
-                    if self.nav_loc:
-                        turn_angle = np.round(nav.get_nav_turn_angle(self.nav_loc) * 180 / 3.14, 2)
-                        pitch_angle = np.round(nav.get_nav_elevation_angle(self.nav_loc) * 180 / 3.14, 2)
-
-                        if turn_angle > 5:
-                            move.bump_left(0.01)
-                        elif turn_angle < -5:
-                            move.bump_right(0.01)
-                        else:
-                            continue
-                        
-                        if pitch_angle > 10:
-                            move.bump_forward(0.1)
+                            if turn_angle > 5:
+                                move.bump_left(0.01)
+                            elif turn_angle < -5:
+                                move.bump_right(0.01)
+                            else:
+                                continue
                             
-
-                        cv.putText(self.minimap,"Turn: " + str(turn_angle) + "deg",(0, 250), cv.FONT_HERSHEY_DUPLEX,1,(255,50,230),1,cv.LINE_AA)
-                        cv.putText(self.minimap,"Pitch: " + str(pitch_angle) + "deg",(0, 300), cv.FONT_HERSHEY_DUPLEX,1,(255,50,230),1,cv.LINE_AA)
+                            if pitch_angle > 5:
+                                move.bump_forward(0.1)
+                            elif pitch_angle < 5:
+                                continue
+                                # move.sit(2)
+                                # cursor_search()
+                    else:
+                        print('No gather node detected')
                         # cv.putText(small,"Nav Target: "+ str(self.nav_loc) + f" {self.nav_loc_match}%",(30, 200), cv.FONT_HERSHEY_DUPLEX,1,(0,255,0),1,cv.LINE_AA)
-                        
 
 
                 if self.enable_cv_preview:
@@ -151,8 +151,7 @@ class ScreenCaptureAgent:
                         print("Enemy Casting % " + str(hue_match_pct(self.enemy_cast_bar_HSV,34,52)))
                         ## interrupt_enemy()
                     
-                    cv.imshow("Computer Vision", small)
-                    # make_window_always_on_top('Computer Vision')
+                    # cv.imshow("Computer Vision", small)
 
                     # cv.imshow("Enemy Cast Bar", self.enemy_cast_bar)
                     # cv.imshow("Enemy Cast Bar Text", self.enemy_cast_bar_text)
@@ -186,6 +185,51 @@ def interrupt_enemy():
     if not keyboard.is_pressed('alt' or keyboard.is_pressed('ctrl') or keyboard.is_pressed('shift')):
         pyautogui.press('f2')
     # If Alt is pressed, it will skip pressing F2
+        
+def cursor_search():
+    toggle_ui()
+    # searching_with_cursor()
+    toggle_ui()
+
+def toggle_ui():
+    # Press and hold the Alt key
+    pyautogui.keyDown('alt')
+    time.sleep(0.3)
+
+    # Press the 'x' key
+    pyautogui.keyDown('x')
+    time.sleep(0.3)
+
+    # Release the 'x' key
+    pyautogui.keyUp('x')
+    time.sleep(0.3)
+
+    # Release the Alt key
+    pyautogui.keyUp('alt')
+
+# def searching_with_cursor():
+#     gather_window_topleft = (626, 361)
+#     gather_window_bottomright = (1308, 722)
+#     width = gather_window_bottomright[0] - gather_window_topleft[0]
+#     height = gather_window_bottomright[1] - gather_window_topleft[1]
+#     mid_x = (gather_window_topleft[0] + gather_window_bottomright[0]) // 2
+
+#     # Define speed and randomness for the cursor movement
+#     speed = 0.3  # Adjust the speed according to your preference
+#     randomness = 20  # Adjust the randomness according to your preference
+
+#     while True:
+#         # Move cursor from left to right
+#         for x in range(gather_window_topleft[0], gather_window_bottomright[0], 10):
+#             pyautogui.moveTo(x, random.randint(gather_window_topleft[1], gather_window_bottomright[1]), duration=speed)
+#             time.sleep(random.uniform(0, randomness) / 100)
+
+#         # Move cursor from right to left
+#         for x in range(gather_window_bottomright[0], gather_window_topleft[0], -10):
+#             pyautogui.moveTo(x, random.randint(gather_window_topleft[1], gather_window_bottomright[1]), duration=speed)
+#             time.sleep(random.uniform(0, randomness) / 100)
+
+
 
 def hue_match_pct(img, hue_low, hue_high):
     match_pixels = 0

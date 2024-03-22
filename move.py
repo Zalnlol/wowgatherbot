@@ -53,8 +53,10 @@ def left_strafe_stop():
 def jump():
     pyautogui.press(KEY_JUMP)
 
-def sit():
-    pyautogui.press(KEY_SIT)
+def sit(t):
+    pyautogui.keyDown(KEY_SIT)
+    time.sleep(t)
+    pyautogui.keyUp(KEY_SIT)
 
 def fly_down_start():
     pyautogui.keyDown(KEY_SIT)

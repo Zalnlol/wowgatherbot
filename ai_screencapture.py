@@ -49,8 +49,8 @@ class ScreenCaptureAgent:
         self.enemy_cast_bar_text_bottom_right = (733,236)
 
         self.minimap = None
-        self.minimap_top_left = (805,383)
-        self.minimap_bottom_right = (1106,684)
+        self.minimap_top_left = (1609,91)
+        self.minimap_bottom_right = (1887,369)
 
         self.center_screen = (960, 540)
         self.center_screen_topleft = (955, 535)
@@ -109,14 +109,14 @@ class ScreenCaptureAgent:
                     
                     if max_val_herb >= 0.4:
                         cv.rectangle(self.minimap, max_loc_herb, (max_loc_herb[0] + icon_w_herb, max_loc_herb[1] + icon_h_herb), (0, 255, 255), 2)
-                        cv.putText(self.minimap,"Nav Tar: " + str(self.nav_loc) + f"{self.nav_loc_match}",(0, 200), cv.FONT_HERSHEY_DUPLEX,0.3,(255,50,230),1,cv.LINE_AA)
+                        cv.putText(self.minimap,"Nav Tar: " + str(self.nav_loc) + f"{self.nav_loc_match}",(0, 200), cv.FONT_HERSHEY_DUPLEX,0.5,(255,50,230),1,cv.LINE_AA)
 
                         if self.nav_loc:
                             turn_angle = np.round(nav.get_nav_turn_angle(self.nav_loc) * 360 / 3.14, 2)
                             pitch_angle = np.round(nav.get_nav_elevation_angle(self.nav_loc) * 360 / 3.14, 2)
                             cv.putText(self.minimap,"Turn: " + str(turn_angle) + "deg",(0, 250), cv.FONT_HERSHEY_DUPLEX,0.5,(255,50,230),1,cv.LINE_AA)
                             cv.putText(self.minimap,"Pitch: " + str(pitch_angle) + "deg",(0, 300), cv.FONT_HERSHEY_DUPLEX,0.5,(255,50,230),1,cv.LINE_AA)
-
+                            
                             if turn_angle > 5:
                                 move.bump_left(0.01)
                             elif turn_angle < -5:
@@ -126,10 +126,13 @@ class ScreenCaptureAgent:
                             
                             if pitch_angle > 5:
                                 move.bump_forward(0.1)
+                                # continue
                             elif pitch_angle < 5:
-                                continue
-                                # move.sit(2)
-                                # cursor_search()
+                                move.sit(2)
+                                ## Replace the coordinates with the coordinates of your rectangle box (left, top, width, height)
+                                # cursor_search(620, 357, 692, 369)
+                            
+
                     else:
                         print('No gather node detected')
                         # cv.putText(small,"Nav Target: "+ str(self.nav_loc) + f" {self.nav_loc_match}%",(30, 200), cv.FONT_HERSHEY_DUPLEX,1,(0,255,0),1,cv.LINE_AA)
@@ -154,18 +157,27 @@ class ScreenCaptureAgent:
                     # cv.imshow("Computer Vision", small)
 
                     # cv.imshow("Enemy Cast Bar", self.enemy_cast_bar)
-                    # cv.imshow("Enemy Cast Bar Text", self.enemy_cast_bar_text)
+                    # cv.imshow("Enemy Cast Bar Text", self.ewnemy_cast_bar_text)
                     cv.imshow("Minimap", self.minimap)
                     make_window_always_on_top('Minimap')
                     cv.waitKey(1)
 
-                elapsed_time = time.time() - fps_report_time
-                if elapsed_time >= fps_report_delay:
-                    self.fps = n_frames / elapsed_time
-                    print("FPS:" + str(self.fps))
-                    n_frames = 0
-                    fps_report_time = time.time()
-                n_frames += 1
+
+
+
+
+
+                # elapsed_time = time.time() - fps_report_time
+                # if elapsed_time >= fps_report_delay:
+                #     self.fps = n_frames / elapsed_time
+                #     print("FPS:" + str(self.fps))
+                #     n_frames = 0
+                #     fps_report_time = time.time()
+                # n_frames += 1
+                    
+
+
+
                 
 class bcolors:
     PINK = '\033[95m'
@@ -185,11 +197,7 @@ def interrupt_enemy():
     if not keyboard.is_pressed('alt' or keyboard.is_pressed('ctrl') or keyboard.is_pressed('shift')):
         pyautogui.press('f2')
     # If Alt is pressed, it will skip pressing F2
-        
-def cursor_search():
-    toggle_ui()
-    # searching_with_cursor()
-    toggle_ui()
+
 
 def toggle_ui():
     # Press and hold the Alt key
@@ -207,27 +215,42 @@ def toggle_ui():
     # Release the Alt key
     pyautogui.keyUp('alt')
 
-# def searching_with_cursor():
-#     gather_window_topleft = (626, 361)
-#     gather_window_bottomright = (1308, 722)
-#     width = gather_window_bottomright[0] - gather_window_topleft[0]
-#     height = gather_window_bottomright[1] - gather_window_topleft[1]
-#     mid_x = (gather_window_topleft[0] + gather_window_bottomright[0]) // 2
 
-#     # Define speed and randomness for the cursor movement
-#     speed = 0.3  # Adjust the speed according to your preference
-#     randomness = 20  # Adjust the randomness according to your preference
+def cursor_search(left, top, width, height):
+    try:
+        prev_x = None
+        while True:
+            # Generate random coordinates within the rectangle
+            # Biasing the random selection towards the edges
+            x_choices = [left, left + width]
+            if prev_x is not None and prev_x in x_choices:
+                x_choices.remove(prev_x)
+            x = random.choice(x_choices)
+            y = random.randint(top, top + height)
+            
+            # Generate a random duration with slight variations
+            duration = random.uniform(0.1, 0.3)
+            
+            # Move the mouse to the generated coordinates smoothly and with variability
+            pyautogui.moveTo(x, y, duration=duration)
+            
+            # Break the loop
+            if keyboard.is_pressed('esc'):
+                break
+            
+            # Update previous x-coordinate
+            prev_x = x
+            
+            # Add a slight delay before the next movement
+            time.sleep(random.uniform(0.1, 0.5))
+    except KeyboardInterrupt:
+        print("Movement stopped by user.")
 
-#     while True:
-#         # Move cursor from left to right
-#         for x in range(gather_window_topleft[0], gather_window_bottomright[0], 10):
-#             pyautogui.moveTo(x, random.randint(gather_window_topleft[1], gather_window_bottomright[1]), duration=speed)
-#             time.sleep(random.uniform(0, randomness) / 100)
+# Example usage:
+# Replace the coordinates with the coordinates of your rectangle box
+# (left, top, width, height)
+# cursor_search(620, 357, 692, 369)
 
-#         # Move cursor from right to left
-#         for x in range(gather_window_bottomright[0], gather_window_topleft[0], -10):
-#             pyautogui.moveTo(x, random.randint(gather_window_topleft[1], gather_window_bottomright[1]), duration=speed)
-#             time.sleep(random.uniform(0, randomness) / 100)
 
 
 

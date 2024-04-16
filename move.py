@@ -1,12 +1,15 @@
 import time
 import pyautogui
+import random
+import keyboard
+from pynput.mouse import Listener, Controller
 
 KEY_RUN_WALK = '\\'
 KEY_JUMP = 'space'
 KEY_LEFT = 'a'
 KEY_RIGHT = 'd'
 KEY_FORWARD = 'w'
-KEY_BACKWARD = 's'
+KEY_BACKWARD = 'down'
 KEY_STRAFE_LEFT = 'q'
 KEY_STRAFE_RIGHT = 'e'
 KEY_SIT = 'x'
@@ -83,6 +86,62 @@ def bump_right(t):
     pyautogui.keyDown(KEY_RIGHT)
     time.sleep(t)
     pyautogui.keyUp(KEY_RIGHT)
+
+
+# Function to check the current cursor icon
+def check_cursor_icon():
+    position = pyautogui.position()
+    return pyautogui.screenshot().getpixel(position)[:3]  # Get RGB color at mouse position
+
+# Function to be called when mouse moves
+def on_move(x, y):
+    # Check cursor icon and perform actions based on the icon
+    cursor_color = check_cursor_icon()
+    # Assuming the herb icon has a specific RGB color (e.g., orange)
+    if cursor_color == (218, 173, 99):  # Adjust RGB values to match your herb icon color
+        print("Herb detected! Perform action here...")
+
+def cursor_search(left, top, width, height):
+    try:
+        start_time = time.time()
+        prev_x = None
+        
+        while (time.time() - start_time) < 5:  # Maximum 5 seconds execution time
+            # Generate random coordinates within the rectangle
+            # Biasing the random selection towards the edges
+            x_choices = [left, left + width]
+            if prev_x is not None and prev_x in x_choices:
+                x_choices.remove(prev_x)
+            x = random.choice(x_choices)
+            y = random.randint(top, top + height)
+            
+            # Generate a random duration with slight variations
+            duration = random.uniform(0.1, 0.3)
+            
+            # Move the mouse to the generated coordinates smoothly and with variability
+            pyautogui.moveTo(x, y, duration=duration)
+            
+            # Break the loop if 'esc' key is pressed
+            if keyboard.is_pressed('esc'):
+                break
+            
+            # Update previous x-coordinate
+            prev_x = x
+            
+            # Add a slight delay before the next movement
+            time.sleep(random.uniform(0.1, 0.5))
+        
+    except KeyboardInterrupt:
+        print("Movement stopped by user.")
+
+    # Ensure the mouse cursor returns to the original position after the loop exits
+    pyautogui.moveTo(left + (width // 2), top + (height // 2), duration=0.2)
+
+# Example usage:
+# Replace the coordinates with the coordinates of your rectangle box
+# (left, top, width, height)
+# cursor_search(620, 357, 692, 369)
+
 
 if __name__ == "__main__":
     time.sleep(5)

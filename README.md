@@ -1,6 +1,6 @@
 # wowgatherbot
 # Credit to pygamebot: https://www.youtube.com/@pgamebot
-# This script is use for auto gathering herb / ore and interupt in World of Warcraft
+# This script is use for auto gathering herb / ore and interrupt in World of Warcraft
 # Using python openCV library
 # The gathering task is done using minimap as navigation system - see screenshot for example.
 # Set minimap to auto rotate
